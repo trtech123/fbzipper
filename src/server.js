@@ -179,4 +179,9 @@ app.post('/api/runner/stop', wrap((req, res) => { runner.stop(); res.json({ ok: 
 // Body-parser errors (bad JSON, too large) as JSON instead of an HTML page.
 app.use((err, req, res, next) => res.status(err.status || 500).json({ error: err.message }));
 
-app.listen(PORT, '127.0.0.1', () => console.log(`fbzipper is running: http://localhost:${PORT}`));
+app.listen(PORT, '127.0.0.1', () => console.log(`fbzipper is running: http://localhost:${PORT}`))
+  .on('error', err => {
+    if (err.code !== 'EADDRINUSE') throw err;
+    console.error(`Port ${PORT} is already in use — fbzipper is probably already running. Open http://localhost:${PORT} or close the other window first.`);
+    process.exit(1);
+  });
