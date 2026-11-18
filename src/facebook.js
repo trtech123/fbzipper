@@ -65,7 +65,12 @@ const RESERVED =new Set(['feed', 'discover', 'joins', 'create', 'notifications',
 export const fetchJoinedGroups = (headless) => exclusive(async () => {
   const page = await getPage(headless);
   await page.goto('https://www.facebook.com/groups/joins/', { waitUntil: 'domcontentloaded' });
-  await assertLoggedIn(page);
+  if (!(await isLoggedIn())) {
+    // Leave a visible window on the login page so the user can sign in right away.
+    if (headless) { await closeBrowser(); await (await getPage(false)).goto('https://www.facebook.com/'); }
+    else await page.goto('https://www.facebook.com/');
+    throw new Error('לא מחובר לפייסבוק. נפתח חלון — התחבר בו, ואז לחץ שוב על "ייבא את הקבוצות שלי"');
+  }
   await page.waitForTimeout(3000);
   const found = new Map();
   let stable = 0;
