@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>fbzipper</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">fbzipper <small>פרסום מתוזמן בקבוצות פייסבוק</small></div>
+    <nav id="tabs">
+      <button data-tab="dash" class="active">דשבורד</button>
+      <button data-tab="groups">קבוצות</button>
+      <button data-tab="posts">פוסטים</button>
+      <button data-tab="campaigns">קמפיינים</button>
+      <button data-tab="queue">תור פרסום</button>
+      <button data-tab="settings">הגדרות</button>
+      <button data-tab="log">יומן</button>
+    </nav>
+  </header>
+
+  <main>
+    <div id="toast" hidden></div>
+
+    <section id="dash" class="tab active">
+      <div class="cards">
+        <div class="card"><h3>מצב</h3><div id="st-run" class="big"></div><div id="st-wait" class="muted"></div></div>
+        <div class="card"><h3>פייסבוק</h3><div id="st-login" class="big"></div>
+          <button id="btn-login">פתח דפדפן להתחברות</button></div>
+        <div class="card"><h3>היום</h3><div class="big"><span id="st-today">0</span> / <span id="st-cap">0</span></div><div class="muted">פוסטים שפורסמו היום</div></div>
+        <div class="card"><h3>תור</h3><div class="big" id="st-pending">0</div><div class="muted" id="st-counts"></div></div>
+      </div>
+      <div class="row">
+        <button id="btn-start" class="primary">▶ הפעל פרסום אוטומטי</button>
+        <button id="btn-stop" class="danger">■ עצור</button>
+      </div>
+      <ol class="help">
+        <li>לחץ <b>פתח דפדפן להתחברות</b> והתחבר לפייסבוק בחלון שנפתח (פעם אחת — ההתחברות נשמרת).</li>
+        <li>בלשונית <b>קבוצות</b> ייבא את הקבוצות שאתה חבר בהן, או הדבק קישורים.</li>
+        <li>בלשונית <b>פוסטים</b> צור פוסט עם טקסט ותמונות.</li>
+        <li>בלשונית <b>קמפיינים</b> בחר פוסטים וקבוצות — נוצר תור פרסום.</li>
+        <li>לחץ <b>הפעל</b>. המערכת מפרסמת בקצב אנושי, בשעות הפעילות, ועוצרת בשבת ובחגים.</li>
+      </ol>
+    </section>
+
+    <section id="groups" class="tab">
+      <div class="row">
+        <button id="btn-import" class="primary">ייבא את הקבוצות שלי מפייסבוק</button>
+        <input id="group-filter" placeholder="סינון לפי שם / תגית">
+      </div>
+      <details><summary>הוספה ידנית (קישור או מזהה בכל שורה)</summary>
+        <textarea id="group-urls" rows="4" placeholder="https://www.facebook.com/groups/123456789"></textarea>
+        <button id="btn-add-groups">הוסף</button>
+      </details>
+      <table><thead><tr><th>פעיל</th><th>שם</th><th>תגיות</th><th>פרסום אחרון</th><th></th></tr></thead><tbody id="groups-body"></tbody></table>
+    </section>
+
+    <section id="posts" class="tab">
+      <form id="post-form" class="panel">
+        <h3>פוסט חדש</h3>
+        <input name="title" placeholder="כותרת פנימית (לא מתפרסמת)">
+        <textarea name="text" rows="7" placeholder="תוכן הפוסט..." required></textarea>
+        <label class="file">תמונות (עד 10): <input type="file" name="images" accept="image/*" multiple></label>
+        <div id="img-preview" class="thumbs"></div>
+        <button class="primary">שמור פוסט</button>
+      </form>
+      <div id="posts-list" class="grid"></div>
+    </section>
+
+    <section id="campaigns" class="tab">
+      <form id="camp-form" class="panel">
+        <h3>קמפיין חדש</h3>
+        <div class="row">
+          <input name="name" placeholder="שם הקמפיין">
+          <label>התחלה: <input type="datetime-local" name="startAt"></label>
+          <label>חזרה כל <input type="number" name="repeatDays" min="0" value="0" class="num"> ימים (0 = פעם אחת)</label>
+        </div>
+        <div class="two">
+          <div><h4>פוסטים <small class="muted">(כמה פוסטים = רוטציה בין הקבוצות)</small></h4><div id="camp-posts" class="checks"></div></div>
+          <div><h4>קבוצות <button type="button" id="camp-all" class="link">בחר הכל</button>
+            <input id="camp-filter" placeholder="סינון" class="small"></h4><div id="camp-groups" class="checks"></div></div>
+        </div>
+        <button class="primary">צור קמפיין</button>
+      </form>
+      <table><thead><tr><th>פעיל</th><th>שם</th><th>פוסטים</th><th>קבוצות</th><th>חזרה</th><th>התקדמות</th><th></th></tr></thead><tbody id="camps-body"></tbody></table>
+    </section>
+
+    <section id="queue" class="tab">
+      <table><thead><tr><th>סטטוס</th><th>פוסט</th><th>קבוצה</th><th>מתוזמן / פורסם</th><th>שגיאה</th><th></th></tr></thead><tbody id="queue-body"></tbody></table>
+    </section>
+
+    <section id="settings" class="tab">
+      <form id="settings-form" class="panel narrow">
+        <label>שעת התחלה <input name="activeStart" type="time"></label>
+        <label>שעת סיום <input name="activeEnd" type="time"></label>
+        <label>מרווח מינימלי בין פוסטים (דקות) <input name="minGapMin" type="number" min="3"></label>
+        <label>מרווח מקסימלי בין פוסטים (דקות) <input name="maxGapMin" type="number" min="3"></label>
+        <label>מקסימום פוסטים ביום <input name="dailyCap" type="number" min="1" max="60"></label>
+        <label>לא לפרסם באותה קבוצה יותר מפעם ב- (שעות) <input name="groupCooldownHours" type="number" min="0"></label>
+        <label class="inline"><input name="shabbatPause" type="checkbox"> עצירה בשבתות ובחגים (זמני תל אביב)</label>
+        <label>לעצור לפני הדלקת נרות (דקות) <input name="shabbatBufferMin" type="number" min="0"></label>
+        <label class="inline"><input name="headless" type="checkbox"> להריץ את הדפדפן ברקע (ללא חלון)</label>
+        <p class="muted">טיפ: פרופיל חדש או פרסום אגרסיבי עלולים לגרום לפייסבוק להגביל את החשבון. מומלץ להתחיל ב-10–15 פוסטים ביום.</p>
+        <button class="primary">שמור הגדרות</button>
+      </form>
+    </section>
+
+    <section id="log" class="tab"><ul id="log-list" class="log"></ul></section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
